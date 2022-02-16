@@ -127,8 +127,8 @@ def prepare_model(args):
     if args.model_class == 'MAML':
         from model.models.maml import MAML 
         model = MAML(args)
-    elif args.model_class == 'MAMLOne':
-        from model.models.mamlone import MAML 
+    elif args.model_class == 'MAMLUnicorn':
+        from model.models.MAMLUnicorn import MAML 
         model = MAML(args)
     else:
         raise ValueError('No Such Model')
