@@ -22,7 +22,7 @@ Model-agnostic meta-learning (MAML) is arguably the most popular meta-learning a
 
 ## Standard Few-shot Learning Results
 
-Experimental results on few-shot learning datasets with ResNet-12 backbone (Same as the [MetaOptNet](https://github.com/kjunelee/MetaOptNet)). We report average results with 10,000 randomly sampled few-shot learning episodes for stablized evaluation. The pre-trained weights (used for initialization) could be downloaded at [here](https://drive.google.com/drive/folders/1WiNF-qKm8yBH4KcC1cdW3gpEwrxTQ0qN?usp=sharing).
+Experimental results on few-shot learning datasets with ResNet-12 backbone (Same as the [MetaOptNet](https://github.com/kjunelee/MetaOptNet)). We report average results with 10,000 randomly sampled few-shot learning episodes for stablized evaluation.
 
 **MiniImageNet Dataset**
 |  Setups  | 1-Shot 5-Way | 5-Shot 5-Way |
@@ -55,7 +55,7 @@ The following packages are required to run the scripts:
 
 - Dataset: please download the dataset and put images into the folder data/[name of the dataset, miniimagenet or cub]/images
 
-- Pre-trained weights: We use the released weights of [FEAT](https://drive.google.com/file/d/1XcUZMNTQ-79_2AkNG3E04zh6bDYnPAMY/view?usp=sharing).
+- Pre-trained weights: The pre-trained weights (used for initialization) could be downloaded at [here](https://drive.google.com/drive/folders/1WiNF-qKm8yBH4KcC1cdW3gpEwrxTQ0qN?usp=sharing).
 
 ## Dataset
 
