@@ -1,16 +1,28 @@
 # How to Train Your MAML to Excel in Few-Shot Classification
 
-The code repository for "How to Train Your MAML to Excel in Few-Shot Classification" (Submitted to NeurIPS 2021) in PyTorch. 
+The code repository for "How to Train Your MAML to Excel in Few-Shot Classification" (Accepted by ICLR 2022) in PyTorch. 
+
+If you use any content of this repo for your work, please cite the following bib entry:
+
+    @article{ye2021UNICORN,
+      author    = {Han-Jia Ye and
+                   Wei-Lun Chao},
+	  title     = {How to Train Your {MAML} to Excel in Few-Shot Classification},
+	  journal   = {CoRR},
+	  volume    = {abs/2106.16245},
+	  year      = {2021}
+	}
+
 
 ## Main idea of UNICORN-MAML
 
 Model-agnostic meta-learning (MAML) is arguably the most popular meta-learning algorithm nowadays, given its flexibility to incorporate various model architectures and to be applied to different problems. Nevertheless, its performance on few-shot classification is far behind many recent algorithms dedicated to the problem. In this paper, we point out several key facets of how to train MAML to excel in few-shot classification. First, we find that a large number of gradient steps are needed for the inner loop update, which contradicts the common usage of MAML for few-shot classification. Second, we find that MAML is sensitive to the permutation of class assignments in meta-testing: for a few-shot task of N classes, there are exponentially many ways to assign the learned initialization of the N-way classifier to the N classes, leading to an unavoidably huge variance. Third, we investigate several ways for permutation invariance and find that learning a shared classifier initialization for all the classes performs the best. On benchmark datasets such as *Mini*ImageNet and *Tiered*ImageNet, our approach, which we name UNICORN-MAML, performs on a par with or even outperforms state-of-the-art algorithms, **while keeping the simplicity of MAML without adding any extra sub-networks**.
 
-<img src='imgs/mean-MAML.png' width='640' height='280'>
+<img src='imgs/mean-MAML.png' width='1040' height='280'>
 
 ## Standard Few-shot Learning Results
 
-Experimental results on few-shot learning datasets with ResNet-12 backbone (Same as the [MetaOptNet](https://github.com/kjunelee/MetaOptNet)). We report average results with 10,000 randomly sampled few-shot learning episodes for stablized evaluation.
+Experimental results on few-shot learning datasets with ResNet-12 backbone (Same as the [MetaOptNet](https://github.com/kjunelee/MetaOptNet)). We report average results with 10,000 randomly sampled few-shot learning episodes for stablized evaluation. The pre-trained weights (used for initialization) could be downloaded at [here](https://drive.google.com/drive/folders/1WiNF-qKm8yBH4KcC1cdW3gpEwrxTQ0qN?usp=sharing).
 
 **MiniImageNet Dataset**
 |  Setups  | 1-Shot 5-Way | 5-Shot 5-Way |
@@ -20,7 +32,7 @@ Experimental results on few-shot learning datasets with ResNet-12 backbone (Same
 | DeepEMD |     65.91    |     82.41    |
 |    FEAT   |     **66.78**  |     82.05    |
 |    MAML   |     64.42  |     83.44    |
-|   UNICORN-MAML   |   65.17  |   **84.30**  |
+|   UNICORN-MAML   |   [65.17](https://drive.google.com/file/d/15496NKRBNrOpyyx3tQ_wD9fB2tx4BeT1/view?usp=sharing)  |   **[84.30](https://drive.google.com/file/d/1gjjQYOAyzoePKL4tvoag-bHPkGi6CmEQ/view?usp=sharing)**  |
 
 **TieredImageNet Dataset**
 
@@ -153,3 +165,5 @@ We can evaluate a learned MAML model and check whether the permutation will intr
 We thank the following repos providing helpful components/functions in our work.
 
 - [FEAT](https://github.com/Sha-Lab/FEAT)
+
+- [AVIATOR](https://github.com/Han-Jia/AVIATOR)
