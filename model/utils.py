@@ -152,7 +152,7 @@ def get_command_line_parser():
     parser.add_argument('--dataset', type=str, default='MiniImageNet', 
                         choices=['MiniImageNet', 'TieredImageNet', 'CUB'])
     parser.add_argument('--model_class', type=str, default='MAML', 
-                        choices=['MAML', 'MAMLOne']) 
+                        choices=['MAML', 'MAMLUnicorn']) 
  
     # optimization parameters
     parser.add_argument('--lr', type=float, default=0.001)
