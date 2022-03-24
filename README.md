@@ -1,6 +1,6 @@
 # How to Train Your MAML to Excel in Few-Shot Classification
 
-The code repository for "How to Train Your MAML to Excel in Few-Shot Classification" (Accepted by ICLR 2022) in PyTorch. 
+The code repository for "[How to Train Your MAML to Excel in Few-Shot Classification](https://arxiv.org/abs/2106.16245)" (Accepted by ICLR 2022) in PyTorch. 
 
 If you use any content of this repo for your work, please cite the following bib entry:
 
