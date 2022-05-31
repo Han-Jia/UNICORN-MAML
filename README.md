@@ -4,12 +4,11 @@ The code repository for "[How to Train Your MAML to Excel in Few-Shot Classifica
 
 If you use any content of this repo for your work, please cite the following bib entry:
 
-    @article{ye2021UNICORN,
+    @inproceedings{ye2021UNICORN,
       author    = {Han-Jia Ye and
                    Wei-Lun Chao},
 	  title     = {How to Train Your {MAML} to Excel in Few-Shot Classification},
-	  journal   = {CoRR},
-	  volume    = {abs/2106.16245},
+	  booktitle = {10th International Conference on Learning Representations ({ICLR})},
 	  year      = {2021}
 	}
 
