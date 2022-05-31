@@ -174,7 +174,6 @@ class FSLTrainer(Trainer):
         args.way, args.shot, args.query = args.eval_way, args.eval_shot, args.eval_query
         # evaluation mode
         self.model.eval()
-        self.model.encoder.is_training = True
         # record the runing mean and variance before validation
         for e in self.running_dict:
             self.running_dict[e]['mean_copy'] = deepcopy(self.running_dict[e]['mean'])
@@ -230,7 +229,6 @@ class FSLTrainer(Trainer):
         # evaluation mode
         self.model.load_state_dict(torch.load(osp.join(self.args.save_path, 'max_acc.pth'))['params'])
         self.model.eval()
-        self.model.encoder.is_training = True
         # record the runing mean and variance before validation
         for e in self.running_dict:
             self.running_dict[e]['mean_copy'] = deepcopy(self.running_dict[e]['mean'])
@@ -289,7 +287,6 @@ class FSLTrainer(Trainer):
         # evaluation mode
         self.model.load_state_dict(torch.load(osp.join(self.args.save_path, 'max_acc.pth'))['params'])
         self.model.eval()
-        self.model.encoder.is_training = True
         # record the runing mean and variance before validation
         for e in self.running_dict:
             self.running_dict[e]['mean_copy'] = deepcopy(self.running_dict[e]['mean'])
