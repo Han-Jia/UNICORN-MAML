@@ -7,7 +7,6 @@ class ConvNet(nn.Module):
     def __init__(self, x_dim=3, hid_dim=64, z_dim=64):
         super().__init__()
         self.num_layers = 4
-        self.is_training = True
         # input layer
         self.add_module('{0}_{1}'.format(0,0), nn.Conv2d(x_dim, hid_dim, 3, padding=1))   
         self.add_module('{0}_{1}'.format(0,1), nn.BatchNorm2d(hid_dim))
@@ -28,7 +27,7 @@ class ConvNet(nn.Module):
             output = F.conv2d(output, params['{0}_{1}.weight'.format(i,0)], bias=params['{0}_{1}.bias'.format(i,0)], padding=1)
             output = F.batch_norm(output, weight=params['{0}_{1}.weight'.format(i,1)], bias=params['{0}_{1}.bias'.format(i,1)],
                                   running_mean=self._modules['{0}_{1}'.format(i,1)].running_mean,
-                                  running_var=self._modules['{0}_{1}'.format(i,1)].running_var, training = self.is_training)
+                                  running_var=self._modules['{0}_{1}'.format(i,1)].running_var, training = self.training)
             output = F.relu(output)
             output = F.max_pool2d(output, 2)
 
