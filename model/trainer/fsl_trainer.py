@@ -199,7 +199,7 @@ class FSLTrainer(Trainer):
             logits = self.model.forward_eval(support, query)
             for e in self.running_dict:
                 self.running_dict[e]['mean'] = deepcopy(self.running_dict[e]['mean_copy'])
-                self.running_dict[e]['var'] = deepcopy(self.running_dict[e]['mean_copy'])
+                self.running_dict[e]['var'] = deepcopy(self.running_dict[e]['var_copy'])
                 
             loss = F.cross_entropy(logits, label)
             acc = count_acc(logits, label)
@@ -253,7 +253,7 @@ class FSLTrainer(Trainer):
             logits = self.model.forward_eval(support, query)
             for e in self.running_dict:
                 self.running_dict[e]['mean'] = deepcopy(self.running_dict[e]['mean_copy'])
-                self.running_dict[e]['var'] = deepcopy(self.running_dict[e]['mean_copy'])
+                self.running_dict[e]['var'] = deepcopy(self.running_dict[e]['var_copy'])
                     
             loss = F.cross_entropy(logits, label)
             acc = count_acc(logits, label)
@@ -318,7 +318,7 @@ class FSLTrainer(Trainer):
                 logits = self.model.forward_eval(support, query)
                 for e in self.running_dict:
                     self.running_dict[e]['mean'] = deepcopy(self.running_dict[e]['mean_copy'])
-                    self.running_dict[e]['var'] = deepcopy(self.running_dict[e]['mean_copy'])
+                    self.running_dict[e]['var'] = deepcopy(self.running_dict[e]['var_copy'])
                 
                 loss = F.cross_entropy(logits, label)
                 acc = count_acc(logits, label)
