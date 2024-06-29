@@ -6,7 +6,6 @@ from torch.utils.data import Dataset
 from torchvision import transforms
 from tqdm import tqdm
 import numpy as np
-from .randaugment import RandAugmentMC
 import jpeg4py as jpeg
 
 THIS_PATH = osp.dirname(__file__)
