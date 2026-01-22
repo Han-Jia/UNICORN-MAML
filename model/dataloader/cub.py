@@ -1,7 +1,7 @@
 import os.path as osp
 import PIL
 from PIL import Image
-
+from tqdm import tqdm
 import numpy as np
 from torch.utils.data import Dataset
 from torchvision import transforms
@@ -10,8 +10,8 @@ import jpeg4py as jpeg
 THIS_PATH = osp.dirname(__file__)
 ROOT_PATH1 = osp.abspath(osp.join(THIS_PATH, '..', '..', '..'))
 ROOT_PATH2 = osp.abspath(osp.join(THIS_PATH, '..', '..'))
-IMAGE_PATH = osp.join(ROOT_PATH1, 'data/cub/images')
-SPLIT_PATH = osp.join(ROOT_PATH2, 'data/cub/split')
+IMAGE_PATH = '/mnt/scratch/users/zha503/Unicorn Folder/data/cub/CUB_200_2011/images'
+SPLIT_PATH = '/mnt/scratch/users/zha503/Unicorn Folder/data/cub/CUB_200_2011/split'
 CACHE_PATH = osp.join(ROOT_PATH2, '.cache/')
 
 def identity(x):
@@ -64,15 +64,14 @@ class CUB(Dataset):
         self.wnids = []
         lines = [x.strip() for x in open(txt_path, 'r').readlines()][1:]
 
-        for l in lines:
-            context = l.split(',')
-            name = context[0] 
-            wnid = context[1]
+        for l in tqdm(lines, ncols=64):
+            name, wnid = l.split(',')
+
             path = osp.join(IMAGE_PATH, name)
             if wnid not in self.wnids:
                 self.wnids.append(wnid)
                 lb += 1
-                
+               
             data.append(path)
             label.append(lb)
 

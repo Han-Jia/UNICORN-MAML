@@ -6,14 +6,15 @@ from torch.utils.data import Dataset
 from torchvision import transforms
 from tqdm import tqdm
 import numpy as np
+
 import jpeg4py as jpeg
 
 THIS_PATH = osp.dirname(__file__)
 ROOT_PATH = osp.abspath(osp.join(THIS_PATH, '..', '..'))
 ROOT_PATH2 = osp.abspath(osp.join(THIS_PATH, '..', '..', '..'))
 # /amax/data/tiered_imagenet_raw
-IMAGE_PATH1 = '/mnt/data51/tiered_imagenet_raw'
-SPLIT_PATH = osp.join(ROOT_PATH, 'data/tieredimagenet/split')
+IMAGE_PATH1 = '/mnt/scratch/users/zha503/Unicorn Folder/data/datasets/arjun2000ashok/tieredimagenet/versions/2/tiered_imagenet/'
+SPLIT_PATH = '/mnt/scratch/users/zha503/Unicorn Folder/data/tieredimagenet/Minisplit'
 CACHE_PATH = osp.join(ROOT_PATH, '.cache/')
 split_map = {'train':IMAGE_PATH1, 'val':IMAGE_PATH1, 'test':IMAGE_PATH1}
 
@@ -57,7 +58,7 @@ class tieredImageNet(Dataset):
         self.data, self.label = self.parse_csv(csv_path, setname)
         self.num_class = len(set(self.label))
 
-        image_size = 84
+        image_size = 32
         self.transform_aug, self.transform = get_transforms(image_size, args.backbone_class)
 
     def parse_csv(self, csv_path, setname):
@@ -69,13 +70,19 @@ class tieredImageNet(Dataset):
 
         self.wnids = []
 
+        char ="0"
         for l in tqdm(lines, ncols=64):
             name, wnid = l.split(',')
             path = osp.join(split_map[setname], name)
+            f_name, f_no= name.split('_')
+            number,extention = f_no.split(".")
+            while len(number)!=8:
+                number= char + number
+            imgFile_path = IMAGE_PATH1  + f_name+number +".jpg"
             if wnid not in self.wnids:
                 self.wnids.append(wnid)
                 lb += 1
-            data.append( path )
+            data.append( imgFile_path )
             label.append(lb)
 
         return data, label

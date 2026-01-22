@@ -6,13 +6,14 @@ from torchvision import transforms
 from tqdm import tqdm
 import numpy as np
 import jpeg4py as jpeg
+import pdb
 
 THIS_PATH = osp.dirname(__file__)
-ROOT_PATH = osp.abspath(osp.join(THIS_PATH, '..', '..'))
-ROOT_PATH2 = osp.abspath(osp.join(THIS_PATH, '..', '..', '..'))
-IMAGE_PATH1 = osp.join(ROOT_PATH2, 'data/miniimagenet/images')
-IMAGE_PATH2 = osp.join(ROOT_PATH2, 'data/miniimagenetaux/images')
-SPLIT_PATH = osp.join(ROOT_PATH, 'data/miniimagenet/split')
+ROOT_PATH = osp.abspath(osp.join(THIS_PATH, '..','..'))
+ROOT_PATH2 = osp.abspath(osp.join(THIS_PATH, '..', '..'))
+IMAGE_PATH1 = osp.join('/mnt/scratch/users/zha503/Unicorn Folder/', 'data/minimagenet/images')
+IMAGE_PATH2 = osp.join('/mnt/scratch/users/zha503/Unicorn Folder/', 'data/miniimagenetaux/images')
+SPLIT_PATH = '/mnt/scratch/users/zha503/Unicorn Folder/data/minimagenet/Mini_split'
 CACHE_PATH = osp.join(ROOT_PATH, '.cache/')
 split_map = {'train':IMAGE_PATH1, 'val':IMAGE_PATH1, 'test':IMAGE_PATH1, 'aux_val':IMAGE_PATH2, 'aux_test':IMAGE_PATH2}
 
@@ -51,13 +52,13 @@ def get_transforms(size, backbone, s = 1):
 class MiniImageNet(Dataset):
     """ Usage:
     """
-    def __init__(self, setname, args):
+    def __init__(self, setname,args):
         csv_path = osp.join(SPLIT_PATH, setname + '.csv')
         self.data, self.label = self.parse_csv(csv_path, setname)
         self.num_class = len(set(self.label))
 
-        image_size = 84
-        self.transform_aug, self.transform = get_transforms(image_size, args.backbone_class)
+        image_size = 32#84
+        self.transform_aug, self.transform = get_transforms(image_size,args.backbone_class)
                
     def parse_csv(self, csv_path, setname):
         lines = [x.strip() for x in open(csv_path, 'r').readlines()][1:]
@@ -100,3 +101,14 @@ class MiniImageNet(Dataset):
         except:
             image = self.transform(Image.open(data).convert('RGB'))
         return image, label
+
+""" def main():
+    m= MiniImageNet("train")
+    
+    print(m.data[1])
+    print("------")
+
+if __name__ == '__main__':
+
+    main() """
+    

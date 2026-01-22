@@ -67,9 +67,9 @@ class Averager():
 def count_acc(logits, label):
     pred = torch.argmax(logits, dim=1)
     if torch.cuda.is_available():
-        return (pred == label).type(torch.cuda.FloatTensor).mean().item()
+        return (pred == label).type(torch.cuda.FloatTensor).mean().item(), (pred == label)
     else:
-        return (pred == label).type(torch.FloatTensor).mean().item()
+        return (pred == label).type(torch.FloatTensor).mean().item(), (pred == label)
 
 def euclidean_metric(a, b):
     n = a.shape[0]
@@ -138,37 +138,38 @@ def postprocess_args(args):
 
 def get_command_line_parser():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--max_epoch', type=int, default=200)
-    parser.add_argument('--episodes_per_epoch', type=int, default=100)
-    parser.add_argument('--num_eval_episodes', type=int, default=500)
-    parser.add_argument('--way', type=int, default=5)
-    parser.add_argument('--eval_way', type=int, default=5)
-    parser.add_argument('--shot', type=int, default=3)
+    parser.add_argument('--max_epoch', type=int, default=40) #40
+    parser.add_argument('--episodes_per_epoch', type=int, default=200)#200
+    parser.add_argument('--num_eval_episodes', type=int, default=400) #400
+    parser.add_argument('--way', type=int, default=4)
+    parser.add_argument('--eval_way', type=int, default=4)
+    parser.add_argument('--shot', type=int, default=1)
     parser.add_argument('--eval_shot', type=int, default=1)
-    parser.add_argument('--query', type=int, default=15)
-    parser.add_argument('--eval_query', type=int, default=15)
+    parser.add_argument('--query', type=int, default=8)
+    parser.add_argument('--eval_query', type=int, default=8)
     parser.add_argument('--backbone_class', type=str, default='Res12',
                         choices=['Res12'])
-    parser.add_argument('--dataset', type=str, default='MiniImageNet', 
-                        choices=['MiniImageNet', 'TieredImageNet', 'CUB'])
+    
     parser.add_argument('--model_class', type=str, default='MAML', 
                         choices=['MAML', 'MAMLUnicorn']) 
  
     # optimization parameters
-    parser.add_argument('--lr', type=float, default=0.001)
+    parser.add_argument('--lr', type=float, default=0.001, help='The outer learning rate for MAML model') #0.004532305926969549 1e-06 0.001 0.0005
+    parser.add_argument('--gd_lr', default=0.004532305926969549, type=float, 
+                        help='The inner learning rate for MAML-Based model')       
+    parser.add_argument('--weight_decay', type=float, default=0.001)
     parser.add_argument('--lr_mul', type=float, default=10)    
     parser.add_argument('--lr_scheduler', type=str, default='cosine', choices=['multistep', 'step', 'cosine'])
     parser.add_argument('--step_size', type=str, default='100')
     parser.add_argument('--gamma', type=float, default=0.5)    
     parser.add_argument('--fix_BN', action='store_true', default=False)    
-    parser.add_argument('--gpu', default='0')
+    parser.add_argument('--gpu', default='1')
     
     # frequent parameters
     parser.add_argument('--temperature', type=float, default=0.5)    
-    parser.add_argument('--para_init', type=str, default='./saves/initialization/miniimagenet/Res12-pre.pth')
-    parser.add_argument('--gd_lr', default=0.001, type=float, 
-                        help='The inner learning rate for MAML-Based model')        
-    parser.add_argument('--inner_iters', default=5, type=int, 
+    parser.add_argument('--para_init', type=str, default=None)#'./saves/initialization/miniimagenet/Res12-pre.pth')
+     
+    parser.add_argument('--inner_iters', default=5, type=int, # from 5 to 1 to see if it solves the nan problem
                         help='The inner iterations for MAML-Based model')        
     parser.add_argument('--noise_type', type=str, default='PCA', 
                         choices=['orth', 'gaussian', 'limitedOrth', 'PCA'])
@@ -176,10 +177,26 @@ def get_command_line_parser():
     
     # usually untouched parameters
     parser.add_argument('--mom', type=float, default=0.9)
-    parser.add_argument('--weight_decay', type=float, default=0.0005)
     parser.add_argument('--num_workers', default=4, type=int)
     parser.add_argument('--log_interval', type=int, default=50)
     parser.add_argument('--eval_interval', type=int, default=5)
-    parser.add_argument('--save_dir', type=str, default='./checkpoints')
-    
+    parser.add_argument('--save_dir', type=str, default='./checkpoints/NoConSlake')
+
+    parser.add_argument('--train_bool', type=int, default=1) # 0 = false = no train =test only to avoid losing files value =0
+    parser.add_argument('--dataset', type=str, default='Slake', 
+                        choices=['MiniImageNet', 'TieredImageNet', 'CUB', 'Slake', 'Flower'])
+    parser.add_argument('--similar_grads', type=int, default=1,
+                        choices=[1, 3, 5, 7, 14])
+
+    parser.add_argument('--cons_loss', type=int, default = 0,
+                        choices=[1, 0]) # 0 mean no cons loss
+    parser.add_argument('--memory_dir', type=str, default='Slake/split',
+                        choices=['slake/split','slake/logicalTest','slake/eculSplit',
+                                 'slake/Crosplit',
+                                 'slake/logicalVal','slake/eculSplitVal',
+                                 'slake/CrosplitVal','minimagenet/Mini_split',
+                                 'minimagenet/Logical_split','minimagenet/Logical_val',
+                                 'minimagenet/EcuSplit','minimagenet/EcuValSplit',
+                                 'minimagenet/CrossSplit','minimagenet/CrossValSplit']) # split is random
+    parser.add_argument('--exp desc', type=str, default='SLAKE 5  inner loop without contrast loss align in train and test with highest hyper')
     return parser

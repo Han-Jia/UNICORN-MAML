@@ -1,5 +1,6 @@
 import torch.nn as nn
 import torch.nn.functional as F
+import torch
 from collections import OrderedDict
 from model.networks.dropblock import DropBlock
 
@@ -62,35 +63,70 @@ class BasicBlock(nn.Module):
 
         return out
     
-    def block_forward_para(self, x, params, base, mode, modules, downsample=False):
+    def block_forward_para(self, x, dy_w, params, base, mode, modules, downsample=False):
         '''the forard function of BasicBlock give parametes'''
         self.num_batches_tracked += 1
         
         residual = x
-        
-        out = F.conv2d(x, params[base + 'conv1.weight'], stride=(1, 1), padding=(1, 1))
-        out = F.batch_norm(out, weight=params[base + 'bn1.weight'], bias=params[base + 'bn1.bias'],
-                           running_mean=modules['bn1'].running_mean,
-                           running_var=modules['bn1'].running_var, training = mode)
-        out = self.relu(out)
-        
-        out = F.conv2d(out, params[base + 'conv2.weight'], stride=(1, 1), padding=(1, 1))
-        out = F.batch_norm(out, weight=params[base + 'bn2.weight'], bias=params[base + 'bn2.bias'],
-                               running_mean=modules['bn2'].running_mean,
-                               running_var=modules['bn2'].running_var, training = mode)        
-        out = self.relu(out)
-        
-        out = F.conv2d(out, params[base + 'conv3.weight'], stride=(1, 1), padding=(1, 1))
-        out = F.batch_norm(out, weight=params[base + 'bn3.weight'], bias=params[base + 'bn3.bias'],
-                               running_mean=modules['bn3'].running_mean,
-                               running_var=modules['bn3'].running_var, training = mode)  
-        
-        if downsample is True:
-            residual = F.conv2d(x, params[base + 'downsample.0.weight'], stride=(1, 1))
-            residual = F.batch_norm(residual, weight=params[base + 'downsample.1.weight'], 
-                                    bias=params[base + 'downsample.1.bias'],
-                                    running_mean=modules['downsample']._modules['1'].running_mean,
-                                    running_var=modules['downsample']._modules['1'].running_var, training = mode)
+
+        if dy_w is None: 
+            out = F.conv2d(x, params[base + 'conv1.weight'], stride=(1, 1), padding=(1, 1))
+
+            out = F.batch_norm(out, weight=params[base + 'bn1.weight'], bias=params[base + 'bn1.bias'],
+                            running_mean=modules['bn1'].running_mean,
+                            running_var=modules['bn1'].running_var, training = mode)
+
+            out = self.relu(out)
+            
+            out = F.conv2d(out, params[base + 'conv2.weight'], stride=(1, 1), padding=(1, 1))
+            #torch.add(params[base + 'conv2.weight'], dyn_w)
+
+            out = F.batch_norm(out, weight=params[base + 'bn2.weight'], bias=params[base + 'bn2.bias'],
+                                running_mean=modules['bn2'].running_mean,
+                                running_var=modules['bn2'].running_var, training = mode) 
+            #torch.add(params[base + 'bn2.weight'], dyn_w)       
+            out = self.relu(out)
+            
+            out = F.conv2d(out, params[base + 'conv3.weight'], stride=(1, 1), padding=(1, 1))
+            out = F.batch_norm(out, weight=params[base + 'bn3.weight'], bias=params[base + 'bn3.bias'],
+                                running_mean=modules['bn3'].running_mean,
+                                running_var=modules['bn3'].running_var, training = mode)  
+            
+            if downsample is True:
+                residual = F.conv2d(x, params[base + 'downsample.0.weight'], stride=(1, 1))
+                residual = F.batch_norm(residual, weight=params[base + 'downsample.1.weight'],
+                                        bias=params[base + 'downsample.1.bias'],
+                                        running_mean=modules['downsample']._modules['1'].running_mean,
+                                        running_var=modules['downsample']._modules['1'].running_var, training = mode)
+        else:
+            out = F.conv2d(x, torch.add(params[base + 'conv1.weight'], torch.tensor(dy_w[base + 'conv1.weight'])), stride=(1, 1), padding=(1, 1))
+
+            out = F.batch_norm(out, weight=torch.add(params[base + 'bn1.weight'], torch.tensor(dy_w[base + 'bn1.weight'])), bias=torch.add(params[base + 'bn1.bias'], torch.tensor(dy_w[base + 'bn1.bias'])),
+                            running_mean=modules['bn1'].running_mean,
+                            running_var=modules['bn1'].running_var, training = mode)
+            #torch.add(params[base + 'bn1.weight'].data, dyn_w)
+            out = self.relu(out)
+            
+            out = F.conv2d(out, torch.add(params[base + 'conv2.weight'], torch.tensor(dy_w[base + 'conv2.weight'])), stride=(1, 1), padding=(1, 1))
+            #torch.add(params[base + 'conv2.weight'], dyn_w)
+
+            out = F.batch_norm(out, weight=torch.add(params[base + 'bn2.weight'], torch.tensor(dy_w[base + 'bn2.weight'])), bias=torch.add(params[base + 'bn2.bias'], torch.tensor(dy_w[base + 'bn2.bias'])),
+                                running_mean=modules['bn2'].running_mean,
+                                running_var=modules['bn2'].running_var, training = mode) 
+            #torch.add(params[base + 'bn2.weight'], dyn_w)       
+            out = self.relu(out)
+            
+            out = F.conv2d(out, torch.add(params[base + 'conv3.weight'], torch.tensor(dy_w[base + 'conv3.weight'])), stride=(1, 1), padding=(1, 1))
+            out = F.batch_norm(out, weight=torch.add(params[base + 'bn3.weight'], torch.tensor(dy_w[base + 'bn3.weight'])), bias=torch.add(params[base + 'bn3.bias'], torch.tensor(dy_w[base + 'bn3.bias'])),
+                                running_mean=modules['bn3'].running_mean,
+                                running_var=modules['bn3'].running_var, training = mode)  
+            
+            if downsample is True:
+                residual = F.conv2d(x, torch.add(params[base + 'downsample.0.weight'], torch.tensor(dy_w[base + 'downsample.0.weight'])), stride=(1, 1))
+                residual = F.batch_norm(residual, weight=torch.add(params[base + 'downsample.1.weight'], torch.tensor(dy_w[base + 'downsample.1.weight'])),
+                                        bias=torch.add(params[base + 'downsample.1.bias'], torch.tensor(dy_w[base + 'downsample.1.bias'])),
+                                        running_mean=modules['downsample']._modules['1'].running_mean,
+                                        running_var=modules['downsample']._modules['1'].running_var, training = mode)
         out += residual
         out = F.relu(out)
         out = self.maxpool(out)
@@ -151,14 +187,14 @@ class ResNetMAMLUS(nn.Module):
 
         return nn.Sequential(*layers)
     
-    def forward(self, x, params = None, embedding = False):
+    def forward(self, x, dy_w, params = None, embedding = False):
         if params is None:
             params = OrderedDict(self.named_parameters())
             
-        x = self.layer1[0].block_forward_para(x, params, 'layer1' + '.0.', self.training, self._modules['layer1']._modules['0']._modules, True)
-        x = self.layer2[0].block_forward_para(x, params, 'layer2' + '.0.', self.training, self._modules['layer2']._modules['0']._modules, True)
-        x = self.layer3[0].block_forward_para(x, params, 'layer3' + '.0.', self.training, self._modules['layer3']._modules['0']._modules, True)
-        x = self.layer4[0].block_forward_para(x, params, 'layer4' + '.0.', self.training, self._modules['layer4']._modules['0']._modules, True)
+        x = self.layer1[0].block_forward_para(x, dy_w, params, 'layer1' + '.0.', self.training, self._modules['layer1']._modules['0']._modules, True)
+        x = self.layer2[0].block_forward_para(x, dy_w, params, 'layer2' + '.0.', self.training, self._modules['layer2']._modules['0']._modules, True)
+        x = self.layer3[0].block_forward_para(x, dy_w, params, 'layer3' + '.0.', self.training, self._modules['layer3']._modules['0']._modules, True)
+        x = self.layer4[0].block_forward_para(x, dy_w, params, 'layer4' + '.0.', self.training, self._modules['layer4']._modules['0']._modules, True)
 
         if self.keep_avg_pool:
             x = self.avgpool(x)
@@ -212,23 +248,30 @@ class ResNetMAML(nn.Module):
 
         return nn.Sequential(*layers)
     
-    def forward(self, x, params = None, embedding = False):
+    def forward(self, x, dy_w, params = None, embedding = False):
+        outputs=[]
         if params is None:
             params = OrderedDict(self.named_parameters())
+
+      
             
-        x = self.layer1[0].block_forward_para(x, params, 'layer1' + '.0.', self.training, self._modules['layer1']._modules['0']._modules, True)
-        x = self.layer2[0].block_forward_para(x, params, 'layer2' + '.0.', self.training, self._modules['layer2']._modules['0']._modules, True)
-        x = self.layer3[0].block_forward_para(x, params, 'layer3' + '.0.', self.training, self._modules['layer3']._modules['0']._modules, True)
-        x = self.layer4[0].block_forward_para(x, params, 'layer4' + '.0.', self.training, self._modules['layer4']._modules['0']._modules, True)
+        x = self.layer1[0].block_forward_para(x, dy_w, params, 'layer1' + '.0.', self.training, self._modules['layer1']._modules['0']._modules, True)
+        x = self.layer2[0].block_forward_para(x, dy_w, params, 'layer2' + '.0.', self.training, self._modules['layer2']._modules['0']._modules, True)
+        x = self.layer3[0].block_forward_para(x, dy_w, params, 'layer3' + '.0.', self.training, self._modules['layer3']._modules['0']._modules, True)
+        x = self.layer4[0].block_forward_para(x, dy_w, params, 'layer4' + '.0.', self.training, self._modules['layer4']._modules['0']._modules, True)
 
         if self.keep_avg_pool:
             x = self.avgpool(x)
-            
-        x = x.view(x.size(0), -1)
         
+        
+        x = x.view(x.size(0), -1)
+        outputs.append(x)
         if embedding:
             return x
         else:
             # Apply Linear Layer
             logits = F.linear(x, weight=params['fc.weight'], bias=params['fc.bias'])
-            return logits
+            #aug_logit = F.linear(x, weight=params['aug.weight'], bias=params['aug.bias'])
+            outputs.append(logits)
+            #outputs.append(aug_logit)
+            return outputs

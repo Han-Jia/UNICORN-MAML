@@ -2,7 +2,7 @@ import torch
 import torch.nn.functional as F
 from torch import nn
 from torch.distributions import Bernoulli
-
+import pdb
 
 class DropBlock(nn.Module):
     def __init__(self, block_size):
@@ -15,6 +15,8 @@ class DropBlock(nn.Module):
 
         if self.training:
             batch_size, channels, height, width = x.shape
+            #print(batch_size, ":",channels,":", height,":", width)
+            #pdb.set_trace()
             bernoulli = Bernoulli(gamma)
             mask = bernoulli.sample((batch_size, channels, height - (self.block_size - 1), width - (self.block_size - 1)))
             if torch.cuda.is_available():

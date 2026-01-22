@@ -37,6 +37,24 @@ def inner_train_step(model, support_data, args):
         updated_params, acc_gradients = update_params(loss, updated_params, acc_gradients, step_size=args.gd_lr, first_order=True)
     return updated_params, acc_gradients
 
+def inner_test_step(model, support_data, args):
+    """ Inner training step procedure. 
+        Should accumulate and record the gradient"""
+    # obtain final prediction
+    updated_params = OrderedDict(model.named_parameters())
+    acc_gradients = [torch.zeros_like(updated_params['fc.weight']), torch.zeros_like(updated_params['fc.bias'])]
+    label = torch.arange(args.way).repeat(args.shot)
+    if torch.cuda.is_available():
+        label = label.type(torch.cuda.LongTensor)
+    else:
+        label = label.type(torch.LongTensor)        
+    
+    for ii in range(args.inner_iters):
+        ypred = model(support_data, updated_params)
+        loss = F.cross_entropy(ypred, label)
+        updated_params, acc_gradients = update_params(loss, updated_params, acc_gradients, step_size=args.gd_lr, first_order=True)
+    return updated_params, acc_gradients
+
 class MAML(nn.Module):
 
     def __init__(self, args):
@@ -62,12 +80,18 @@ class MAML(nn.Module):
         # update with gradient descent
         updated_params, acc_gradients = inner_train_step(self.encoder, data_shot, self.args)
         
+        
+
         # reupate with the initial classifier and the accumulated gradients
         updated_params['fc.weight'] = self.fcone.weight.repeat(self.args.way, 1) - self.args.gd_lr * acc_gradients[0]
         updated_params['fc.bias'] = self.fcone.bias.repeat(self.args.way) - self.args.gd_lr * acc_gradients[1]
+
+        # flatten the grad to be stored in a numpy file
+        flat_grad = torch.cat([g.contiguous().view(-1) for g in acc_gradients])
+        sup_grad=flat_grad.resize_([self.n_way*self.k_spt,1,28,28]).detach().cpu().numpy()
         
         logitis = self.encoder(data_query, updated_params) / self.args.temperature
-        return logitis
+        return logitis, sup_grad
     
     def forward_eval(self, data_shot, data_query):
         # set the initial classifier
@@ -76,7 +100,7 @@ class MAML(nn.Module):
         
         # update with gradient descent
         self.train()
-        updated_params, acc_gradients = inner_train_step(self.encoder, data_shot, self.args)
+        updated_params, acc_gradients = inner_test_step(self.encoder, data_shot, self.args)
         
         # reupate with the initial classifier and the accumulated gradients
         updated_params['fc.weight'] = self.fcone.weight.repeat(self.args.way, 1) - self.args.gd_lr * acc_gradients[0]

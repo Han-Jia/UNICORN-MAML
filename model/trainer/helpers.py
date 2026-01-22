@@ -10,10 +10,10 @@ def get_dataloader(args):
     if args.dataset == 'MiniImageNet':
         # Handle MiniImageNet
         from model.dataloader.mini_imagenet import MiniImageNet as Dataset
-        args.dropblock_size = 5        
+        args.dropblock_size = 2#5        
     elif args.dataset == 'CUB':
         from model.dataloader.cub import CUB as Dataset
-        args.dropblock_size = 5        
+        args.dropblock_size = 2        
     elif args.dataset == 'CIFARFS':
         from model.dataloader.cifarfs import CIFARFS as Dataset
         args.dropblock_size = 2                
@@ -22,7 +22,13 @@ def get_dataloader(args):
         args.dropblock_size = 2        
     elif args.dataset == 'TieredImageNet':
         from model.dataloader.tiered_imagenet_raw import tieredImageNet as Dataset    
-        args.dropblock_size = 5        
+        args.dropblock_size = 2 
+    elif args.dataset == 'Slake':
+        from model.dataloader.slake import Slake as Dataset    
+        args.dropblock_size = 2 
+    elif args.dataset == 'Flower':
+        from model.dataloader.flower import Flower as Dataset    
+        args.dropblock_size = 2             
     else:
         raise ValueError('Non-supported Dataset.')
 
@@ -51,7 +57,7 @@ def get_dataloader(args):
     
     testset = Dataset('test', args)
     test_sampler = CategoriesSampler(testset.label,
-                                     10000, args.eval_way,
+                                     100, args.eval_way,
                                      args.eval_shot + args.eval_query)
     test_loader = DataLoader(dataset=testset,
                             batch_sampler=test_sampler,
@@ -64,10 +70,10 @@ def get_cross_shot_dataloader(args, shot):
     if args.dataset == 'MiniImageNet':
         # Handle MiniImageNet
         from model.dataloader.mini_imagenet import MiniImageNet as Dataset
-        args.dropblock_size = 5        
+        args.dropblock_size = 2#5        
     elif args.dataset == 'CUB':
         from model.dataloader.cub import CUB as Dataset
-        args.dropblock_size = 5        
+        args.dropblock_size = 2        
     elif args.dataset == 'CIFARFS':
         from model.dataloader.cifarfs import CIFARFS as Dataset
         args.dropblock_size = 2                
@@ -76,13 +82,19 @@ def get_cross_shot_dataloader(args, shot):
         args.dropblock_size = 2        
     elif args.dataset == 'TieredImageNet':
         from model.dataloader.tiered_imagenet_raw import tieredImageNet as Dataset    
-        args.dropblock_size = 5                
+        args.dropblock_size = 2 
+    elif args.dataset == 'Slake':
+        from model.dataloader.slake import Slake as Dataset    
+        args.dropblock_size = 2     
+    elif args.dataset == 'Flower':
+        from model.dataloader.flower import Flower as Dataset    
+        args.dropblock_size = 2                     
     else:
         raise ValueError('Non-supported Dataset.')
     
     testset = Dataset('test', args)
     test_sampler = CategoriesSampler(testset.label,
-                                     10000, args.eval_way,
+                                     100, args.eval_way,
                                      shot + args.eval_query)    
     test_loader = DataLoader(dataset=testset,
                             batch_sampler=test_sampler,
@@ -95,10 +107,10 @@ def get_class_dataloader(args):
     if args.dataset == 'MiniImageNet':
         # Handle MiniImageNet
         from model.dataloader.mini_imagenet import MiniImageNet as Dataset
-        args.dropblock_size = 5        
+        args.dropblock_size = 2#5        
     elif args.dataset == 'CUB':
         from model.dataloader.cub import CUB as Dataset
-        args.dropblock_size = 5        
+        args.dropblock_size = 2        
     elif args.dataset == 'CIFARFS':
         from model.dataloader.cifarfs import CIFARFS as Dataset
         args.dropblock_size = 2                
@@ -107,7 +119,13 @@ def get_class_dataloader(args):
         args.dropblock_size = 2        
     elif args.dataset == 'TieredImageNet':
         from model.dataloader.tiered_imagenet_raw import tieredImageNet as Dataset    
-        args.dropblock_size = 5                
+        args.dropblock_size = 2 
+    elif args.dataset == 'Slake':           
+        from model.dataloader.slake import Slake as Dataset    
+        args.dropblock_size = 2       
+    elif args.dataset == 'Flower':
+        from model.dataloader.flower import Flower as Dataset    
+        args.dropblock_size = 2           
     else:
         raise ValueError('Non-supported Dataset.')
 
@@ -140,6 +158,9 @@ def prepare_model(args):
         pretrained_dict = {k: v for k, v in pretrained_dict.items() if k in model_dict}
         print(pretrained_dict.keys())
         model_dict.update(pretrained_dict)
+        model.load_state_dict(model_dict)
+    else:
+        model_dict = model.state_dict() 
         model.load_state_dict(model_dict)
 
     if torch.cuda.is_available():
